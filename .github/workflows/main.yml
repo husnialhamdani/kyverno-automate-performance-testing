@@ -30,7 +30,7 @@ jobs:
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           source: "file1.sh"
-          target: "file1.sh"
+          target: "/root"
           
       - name: executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
