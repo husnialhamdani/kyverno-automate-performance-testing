@@ -41,4 +41,4 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            bash file1.sh
+            bash automation.sh
