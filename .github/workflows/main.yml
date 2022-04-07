@@ -37,4 +37,4 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            touch test-from-github-ssh-action.txt
+            bash file1.sh
