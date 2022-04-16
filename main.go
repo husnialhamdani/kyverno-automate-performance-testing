@@ -22,14 +22,20 @@ package main
 */
 
 import (
+	"bufio"
 	"context"
-	"flag"
+	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
-	"net/smtp"
+	"os"
+	"os/exec"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
+	"gopkg.in/gomail.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -40,7 +46,7 @@ import (
 )
 
 func main() {
-	rules := clientcmd.NewDefaultClientConfigLoadingRules()
+	/* rules := clientcmd.NewDefaultClientConfigLoadingRules()
 	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
 	config, err := kubeconfig.ClientConfig()
 	if err != nil {
@@ -56,13 +62,17 @@ func main() {
 	log.Print("scales selected: ", *scalesPtr, ": ", scales[*scalesPtr])
 	size := scales[*scalesPtr] / 5
 
+	//Get usage
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go getMetrics(wg, 10, 10, "kyverno-856b9c4fbd-fxqqs", "kyverno")
+
 	//dependencies
 	label := map[string]string{"app": "web"}
 	namespace := "default"
 
 	//Create resources - steps up
 	fmt.Println("Creating resource..")
-	time.Sleep(time.Duration(2) * time.Second)
 	for i := 0; i < size; i++ {
 		counter := strconv.Itoa(i)
 		createNamespace(*clientset, counter)
@@ -73,11 +83,10 @@ func main() {
 		createCronjob(*clientset, counter, namespace, "* * * * *")
 	}
 
-	time.Sleep(time.Duration(10) * time.Minute)
+	time.Sleep(time.Duration(5) * time.Minute)
 
 	//Delete resources - steps down
 	fmt.Println("Deleting resource..")
-	time.Sleep(time.Duration(5) * time.Minute)
 	for i := size - 1; i >= size/2; i-- {
 		counter := strconv.Itoa(i)
 		deleteNamespace(*clientset, counter)
@@ -88,15 +97,16 @@ func main() {
 		deleteCronjob(*clientset, counter, namespace)
 	}
 
-	//getMetrics(0, 10, "nginx")
-
-	/* 	var report string
-	   	sendMail(report, "Kyverno Automation Performance Testing report") */
+	wg.Wait()
+	visualizeAnomaly()
+	*/
 
 	//cleanup(*clientset, size, "default")
+	sendReport("dhanielluis@gmail.com", "husni.alhamdani@shopee.com", "Kyverno Automation Performance Testing report")
 }
 
-func getMetrics(duration int, interval int, name string) []int {
+func getMetrics(wg *sync.WaitGroup, duration int, interval int, name string, namespace string) {
+	defer wg.Done()
 	rules := clientcmd.NewDefaultClientConfigLoadingRules()
 	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
 	config, err := kubeconfig.ClientConfig()
@@ -109,23 +119,33 @@ func getMetrics(duration int, interval int, name string) []int {
 		panic(err)
 	}
 
-	var memoryUsage []int
-	podmetricGet, err := mc.MetricsV1beta1().PodMetricses(metav1.NamespaceDefault).Get(context.Background(), name, metav1.GetOptions{})
-	if err != nil {
-		panic(err)
-	}
-	memQuantity, ok := podmetricGet.Containers[0].Usage.Memory().AsInt64()
-	if !ok {
-		panic(!ok)
-	}
-
+	var memoryUsage [][]int
 	for len(memoryUsage) < (int(duration) * 60 / interval) {
-		memoryUsage = append(memoryUsage, int(memQuantity)/1000000)
+		podmetricGet, err := mc.MetricsV1beta1().PodMetricses(namespace).Get(context.Background(), name, metav1.GetOptions{})
+		if err != nil {
+			panic(err)
+		}
+		memQuantity, ok := podmetricGet.Containers[0].Usage.Memory().AsInt64()
+		if !ok {
+			panic(!ok)
+		}
+		memoryUsage = append(memoryUsage, []int{len(memoryUsage), int(memQuantity) / 1000000})
 		fmt.Println(memoryUsage)
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
 
-	return memoryUsage
+	csvfile, err := os.Create("usage.csv")
+	if err != nil {
+		log.Fatalf("failed creating file: %s", err)
+	}
+	csvwriter := csv.NewWriter(csvfile)
+	for _, row := range memoryUsage {
+		st := strings.Fields(strings.Trim(fmt.Sprint(row), "[]"))
+		_ = csvwriter.Write(st)
+	}
+	csvwriter.Flush()
+	csvfile.Close()
+
 }
 
 func cleanup(clientset kubernetes.Clientset, size int, namespace string) {
@@ -348,24 +368,49 @@ func deleteDeployment(clientset kubernetes.Clientset, name string, namespace str
 	fmt.Println("Deployment deleted:", "deployment-"+name)
 }
 
-func sendMail(body string, subject string) {
-	from := ""
-	pass := ""
-	to := ""
-
-	msg := "From: " + from + "\n" +
-		"To: " + to + "\n" +
-		"Subject: " + subject + "\n\n" +
-		body
-
-	err := smtp.SendMail("smtp.gmail.com:587",
-		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
-		from, []string{to}, []byte(msg))
-
+func visualizeAnomaly() {
+	cmd := exec.Command("python3", "anomalydetection.py")
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Printf("smtp error: %s", err)
-		return
+		panic(err)
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		panic(err)
+	}
+	err = cmd.Start()
+	if err != nil {
+		panic(err)
 	}
 
-	log.Print("email sent")
+	go copyOutput(stdout)
+	go copyOutput(stderr)
+
+	cmd.Wait()
+	fmt.Println("report generated in report.png")
+}
+
+func copyOutput(r io.Reader) {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+}
+
+func sendReport(from string, to string, subject string) {
+	m := gomail.NewMessage()
+	m.SetHeader("From", from)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", "Kyverno Automation Performance Testing result:")
+	m.Attach("report.png")
+
+	d := gomail.NewPlainDialer("smtp.gmail.com", 587, from, "zxzzxnhrxlpawtgm")
+
+	// Send the email to Bob, Cora and Dan.
+	if err := d.DialAndSend(m); err != nil {
+		panic(err)
+	} else {
+		fmt.Println("email sent")
+	}
 }

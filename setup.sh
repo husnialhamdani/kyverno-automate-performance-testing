@@ -4,8 +4,8 @@
 sysctl -w fs.inotify.max_queued_events=1048576
 sysctl -w fs.inotify.max_user_watches=1048576
 sysctl -w fs.inotify.max_user_instances=1048576
-kind create cluster --config config.yaml
-kubectl apply -f metricserver.yaml
+kind create cluster --config cluster-config/kind-config.yaml
+kubectl apply -f cluster-config/metricserver.yaml
 
 #Install prometheus and grafana
 git clone https://github.com/prometheus-operator/kube-prometheus.git
