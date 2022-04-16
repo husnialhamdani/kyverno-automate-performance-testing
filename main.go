@@ -25,6 +25,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -46,7 +47,7 @@ import (
 )
 
 func main() {
-	/* rules := clientcmd.NewDefaultClientConfigLoadingRules()
+	rules := clientcmd.NewDefaultClientConfigLoadingRules()
 	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
 	config, err := kubeconfig.ClientConfig()
 	if err != nil {
@@ -99,10 +100,9 @@ func main() {
 
 	wg.Wait()
 	visualizeAnomaly()
-	*/
 
 	//cleanup(*clientset, size, "default")
-	sendReport("dhanielluis@gmail.com", "husni.alhamdani@shopee.com", "Kyverno Automation Performance Testing report")
+	sendReport(os.Getenv("EMAILFROM"), os.Getenv("EMAILTO"), "Kyverno Automation Performance Testing report")
 }
 
 func getMetrics(wg *sync.WaitGroup, duration int, interval int, name string, namespace string) {
@@ -405,7 +405,7 @@ func sendReport(from string, to string, subject string) {
 	m.SetBody("text/html", "Kyverno Automation Performance Testing result:")
 	m.Attach("report.png")
 
-	d := gomail.NewPlainDialer("smtp.gmail.com", 587, from, "zxzzxnhrxlpawtgm")
+	d := gomail.NewPlainDialer("smtp.gmail.com", 587, from, os.Getenv("EMAILPASS"))
 
 	// Send the email to Bob, Cora and Dan.
 	if err := d.DialAndSend(m); err != nil {
