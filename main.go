@@ -73,7 +73,7 @@ func main() {
 		createCronjob(*clientset, counter, namespace, "* * * * *")
 	}
 
-	time.Sleep(time.Duration(10) * time.Second)
+	time.Sleep(time.Duration(10) * time.Minute)
 
 	//Delete resources - steps down
 	fmt.Println("Deleting resource..")
