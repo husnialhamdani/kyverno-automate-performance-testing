@@ -34,11 +34,10 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            pwd
+            ls
             bash dir/setup.sh
             sleep 5
-            go run dir/main.go
-            rm -rf dir
+            /usr/local/bin/go run dir/main.go
      
      # - name: storing report
      #   uses: actions/upload-artifact@v3
