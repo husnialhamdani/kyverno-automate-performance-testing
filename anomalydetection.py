@@ -1,4 +1,5 @@
 # python outlier detection
+# pip3 install pyod
 
 import warnings
 import numpy as np
@@ -69,7 +70,7 @@ def plot_anomalies(df, x='date', y='amount'):
     f = plt.ylabel(y)
     f = plt.xticks(rotation=90)
     #plt.show()
-    plt.savefig("figure1")
+    plt.savefig("report.png")
 
 
 def find_anomalies(value, lower_threshold, upper_threshold):
@@ -94,7 +95,7 @@ def iqr_anomaly_detector(data, column='amount', threshold=1.1):
     return df
   
 
-"""KNN Based Outlier Detection"""
+"""K-Nearest Neighbours Based Outlier Detection"""
 knn_model = KNN()
 knn_df = fit_model(knn_model, data)
 plot_anomalies(knn_df)
