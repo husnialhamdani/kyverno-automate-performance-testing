@@ -57,4 +57,4 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            bash ~/dir/automation.sh
+            /usr/local/go/bin/go run ~/dir/main.go
