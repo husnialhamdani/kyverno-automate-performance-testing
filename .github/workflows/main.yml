@@ -34,7 +34,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            git clone https://github.com/husnialhamdani/kyverno-automate-performance-testing.git dir
+            /usr/bin/git clone https://github.com/husnialhamdani/kyverno-automate-performance-testing.git dir
             bash dir/setup.sh
             sleep 5
             go run dir/main.go
