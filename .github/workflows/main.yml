@@ -35,9 +35,9 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             ls
-            bash dir/setup.sh
+            bash ~/dir/setup.sh
             sleep 5
-            /usr/local/bin/go run dir/main.go
+            /usr/local/bin/go run ~/dir/main.go
      
      # - name: storing report
      #   uses: actions/upload-artifact@v3
