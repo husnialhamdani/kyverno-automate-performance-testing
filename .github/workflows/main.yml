@@ -10,8 +10,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
+  setup-cluster:
     runs-on: ubuntu-latest
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -23,10 +22,6 @@ jobs:
           
       - name: setup cluster
         uses: appleboy/ssh-action@master
-        env:
-          EMAILFROM: ${{ secrets.EMAILFROM }}
-          EMAILPASS: ${{ secrets.EMAILPASS }}
-          EMAILTO: ${{ secrets.EMAILTO }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -36,7 +31,19 @@ jobs:
           script: |
             ls
             bash ~/dir/setup.sh
-            
+   
+     # - name: storing report
+     #   uses: actions/upload-artifact@v3
+     #   with:
+     #     name: report
+     #     path: report.png
+
+  automation:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+      
       - name: run automation
         uses: appleboy/ssh-action@master
         env:
@@ -50,10 +57,4 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            sudo /usr/local/bin/go run ~/dir/main.go
-     
-     # - name: storing report
-     #   uses: actions/upload-artifact@v3
-     #   with:
-     #     name: report
-     #     path: report.png
+            sudo go run ~/dir/main.go
