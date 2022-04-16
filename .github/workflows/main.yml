@@ -57,4 +57,6 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            /usr/local/go/bin/go run ~/dir/main.go
+            cd ~/dir
+            /usr/local/go/bin/go mod download
+            /usr/local/go/bin/go run main.go
