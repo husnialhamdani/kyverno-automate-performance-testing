@@ -56,7 +56,7 @@ func main() {
 	clientset := kubernetes.NewForConfigOrDie(config)
 
 	//Scales mapping
-	scales := map[string]int{"xs": 100, "small": 500, "medium": 1000, "large": 20000, "xl": 3000}
+	scales := map[string]int{"xs": 100, "small": 500, "medium": 1000, "large": 2000, "xl": 3000}
 	scalesPtr := flag.String("scales", "xs", "choose the scale size (small/medium/large/xl) default: xs")
 
 	flag.Parse()
@@ -84,7 +84,7 @@ func main() {
 		createCronjob(*clientset, counter, namespace, "* * * * *")
 	}
 
-	time.Sleep(time.Duration(5) * time.Minute)
+	time.Sleep(time.Duration(10) * time.Minute)
 
 	//Delete resources - steps down
 	fmt.Println("Deleting resource..")
