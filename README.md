@@ -1,7 +1,7 @@
 # kyverno-automate-performance-testing
 
 ### Setup cluster, metrics server, snstall Kyverno & Policies
-$ bash automation.sh
+$ bash setup.sh
 
 ### Automate Performance Testing
 #### Scales options
