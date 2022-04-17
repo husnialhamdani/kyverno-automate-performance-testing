@@ -13,5 +13,6 @@ $ bash automation.sh
 
 #### Example commands
 $ go mod download
+
 $ go run main.go -scales=large
 
