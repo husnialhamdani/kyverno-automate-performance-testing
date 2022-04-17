@@ -1,6 +1,6 @@
 # kyverno-automate-performance-testing
 
-### Setup cluster, metrics server, snstall Kyverno & Policies
+### Setup cluster, metrics server, install Kyverno & Policies
 $ bash setup.sh
 
 ### Automate Performance Testing
@@ -40,6 +40,7 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             ls
+            git clone https://github.com/husnialhamdani/kyverno-automate-performance-testing.git dir
             bash ~/dir/setup.sh
    
      # - name: storing report
@@ -67,7 +68,6 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
-            git clone https://github.com/husnialhamdani/kyverno-automate-performance-testing.git dir
             cd ~/dir
             /usr/local/go/bin/go mod download
             /usr/local/go/bin/go run main.go -scales=large
