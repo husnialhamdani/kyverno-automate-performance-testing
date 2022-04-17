@@ -12,7 +12,7 @@ from sklearn.ensemble import IsolationForest
 
 #read from csv
 usage = []
-with open('usage-2.csv') as csv_file:
+with open('usage.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
         row[1]=int(row[1])
