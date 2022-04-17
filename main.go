@@ -116,18 +116,18 @@ func getMetrics(wg *sync.WaitGroup, duration int, interval int, name string, nam
 
 	mc, err := metrics.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	var memoryUsage [][]int
 	for len(memoryUsage) < (int(duration) * 60 / interval) {
 		podmetricGet, err := mc.MetricsV1beta1().PodMetricses(namespace).Get(context.Background(), name, metav1.GetOptions{})
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 		memQuantity, ok := podmetricGet.Containers[0].Usage.Memory().AsInt64()
 		if !ok {
-			panic(!ok)
+			fmt.Println(!ok)
 		}
 		memoryUsage = append(memoryUsage, []int{len(memoryUsage), int(memQuantity) / 1000000})
 		fmt.Println(memoryUsage)
