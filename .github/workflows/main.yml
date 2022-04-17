@@ -59,6 +59,8 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: ${{ secrets.PORT }}
           script: |
+            export EMAILFROM=$EMAILFROM
+            printenv | grep EMAIL
             git clone https://github.com/husnialhamdani/kyverno-automate-performance-testing.git dir
             cd ~/dir
             /usr/local/go/bin/go mod download
