@@ -62,5 +62,5 @@ jobs:
             git clone https://github.com/husnialhamdani/kyverno-automate-performance-testing.git dir
             cd ~/dir
             /usr/local/go/bin/go mod download
-            pip3 install -r requirements.txt
+            pip install -r requirements.txt
             /usr/local/go/bin/go run main.go -scales=xs
