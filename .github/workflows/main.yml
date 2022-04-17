@@ -40,6 +40,7 @@ jobs:
 
   automation:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
@@ -59,4 +60,4 @@ jobs:
           script: |
             cd ~/dir
             /usr/local/go/bin/go mod download
-            /usr/local/go/bin/go run main.go
+            /usr/local/go/bin/go run main.go -scales=large
